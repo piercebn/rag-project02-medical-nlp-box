@@ -6,6 +6,7 @@ from services.std_service import StdService
 from services.abbr_service import AbbrService
 from services.corr_service import CorrService
 from services.gen_service import GenService
+from services.fin_ner_service import FinNERService
 from typing import List, Dict, Optional, Literal, Union, Any
 import logging
 
@@ -31,6 +32,7 @@ standardization_service = StdService()  # 术语标准化服务
 abbr_service = AbbrService()  # 缩写扩展服务
 gen_service = GenService()  # 文本生成服务
 corr_service = CorrService()  # 拼写纠正服务
+fin_ner_service = FinNERService()  # 金融命名实体识别服务
 
 # 基础模型类
 class BaseInputModel(BaseModel):
@@ -285,6 +287,17 @@ async def generate_medical_content(input: GenInput):
             raise HTTPException(status_code=400, detail="Invalid method")
     except Exception as e:
         logger.error(f"Error in medical content generation: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# API 端点：金融命名实体识别
+@app.post("/api/fin-ner")
+async def fin_ner(input: TextInput):
+    try:
+        logger.info(f"Received financial NER request: text={input.text}, termTypes={input.termTypes}")
+        results = fin_ner_service.process(input.text, input.termTypes)
+        return results
+    except Exception as e:
+        logger.error(f"Error in financial NER processing: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # 启动服务器

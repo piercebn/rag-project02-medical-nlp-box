@@ -57,7 +57,7 @@ const GenPage = () => {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://172.20.116.213:8000/api/gen', {
+      const response = await fetch('http://localhost:8000/api/gen', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
