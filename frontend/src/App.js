@@ -7,6 +7,7 @@ import CorrPage from './pages/CorrPage';
 import AbbrPage from './pages/AbbrPage';
 import GenPage from './pages/GenPage';
 import FinNerPage from './pages/FinNerPage';
+import FinStdPage from './pages/FinStdPage';
 
 const WelcomePage = () => {
   return (
@@ -47,6 +48,7 @@ const App = () => {
             <Route path="/abbr" element={<AbbrPage />} />
             <Route path="/gen" element={<GenPage />} />
             <Route path="/fin-ner" element={<FinNerPage />} />
+            <Route path="/fin-std" element={<FinStdPage />} />
           </Routes>
         </main>
       </div>

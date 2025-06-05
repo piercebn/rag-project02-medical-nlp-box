@@ -5,7 +5,8 @@ import {
   FileCheck, 
   BookOpen, 
   FileEdit, 
-  FileText
+  FileText,
+  Banknote
 } from 'lucide-react';
 
 const Sidebar = ({ width }) => {
@@ -34,6 +35,9 @@ const Sidebar = ({ width }) => {
         </Link>
         <Link to="/fin-ner" className="flex items-center p-3 text-gray-700 hover:bg-gray-100">
           <Stethoscope className="mr-3" /> 金融命名实体识别
+        </Link>
+        <Link to="/fin-std" className="flex items-center p-3 text-gray-700 hover:bg-gray-100">
+          <Banknote className="mr-3" /> 金融术语标准化
         </Link>
       </nav>
     </div>

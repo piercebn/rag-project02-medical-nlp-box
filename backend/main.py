@@ -7,6 +7,7 @@ from services.abbr_service import AbbrService
 from services.corr_service import CorrService
 from services.gen_service import GenService
 from services.fin_ner_service import FinNERService
+from services.fin_std_service import FinStdService
 from typing import List, Dict, Optional, Literal, Union, Any
 import logging
 
@@ -33,6 +34,7 @@ abbr_service = AbbrService()  # 缩写扩展服务
 gen_service = GenService()  # 文本生成服务
 corr_service = CorrService()  # 拼写纠正服务
 fin_ner_service = FinNERService()  # 金融命名实体识别服务
+fin_std_service = FinStdService()  # 金融术语标准化服务
 
 # 基础模型类
 class BaseInputModel(BaseModel):
@@ -298,6 +300,48 @@ async def fin_ner(input: TextInput):
         return results
     except Exception as e:
         logger.error(f"Error in financial NER processing: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# API 端点：金融术语标准化
+@app.post("/api/fin-std")
+async def financial_standardization(input: TextInput):
+    try:
+        # 记录请求信息
+        logger.info(f"Received request: text={input.text}, options={input.options}, embeddingOptions={input.embeddingOptions}")
+
+        # 1. 金融实体识别
+        ner_results = fin_ner_service.process(input.text, input.termTypes)
+        
+        # 2. 初始化金融标准化服务
+        fin_std_service = FinStdService(
+            provider=input.embeddingOptions.provider,
+            model=input.embeddingOptions.model,
+            db_path=f"db/{input.embeddingOptions.dbName}.db",
+            collection_name=input.embeddingOptions.collectionName
+        )
+
+        # 3. 获取识别到的金融实体
+        entities = ner_results.get('entities', [])
+        if not entities:
+            return {"message": "No financial terms recognized", "standardized_terms": []}
+
+        # 4. 标准化每个实体
+        standardized_results = []
+        for entity in entities:
+            std_result = fin_std_service.search_similar_terms(entity['word'])
+            standardized_results.append({
+                "original_term": entity['word'],
+                "entity_group": entity['entity_group'],
+                "standardized_results": std_result
+            })
+
+        return {
+            "message": f"{len(entities)} financial terms recognized and standardized",
+            "standardized_terms": standardized_results
+        }
+
+    except Exception as e:
+        logger.error(f"Error in financial standardization processing: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # 启动服务器
